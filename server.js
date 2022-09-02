@@ -8,6 +8,9 @@ const db = require("./db/conn");
 //----- Middleware
 app.use(cors());
 app.use(express.json());
+
+//----- Routes
+app.use(require("./routes/stockApi"));
  
 //----- Connection
 const port = process.env.PORT || 5000;
