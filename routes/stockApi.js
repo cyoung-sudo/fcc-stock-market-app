@@ -17,14 +17,23 @@ stockApiRoutes.post("/api/stockApi/addStock", (req, res) => {
   .then(apiRes => {
     // Check for error message
     if(apiRes.data["Error Message"]) {
-      //--- Valid ticker
+      //--- Invalid ticker
       res.json({ 
         success: false,
         message: "Invalid ticker"
       });
+    } else if(apiRes.data["Note"]) {
+      //--- API request limit (5/min)
+      res.json({ 
+        success: false,
+        message: "Limit reached: 5 requests per minute"
+      });
     } else {
-      //--- Invalid ticker
-      res.json({ success: true });
+      //--- Valid ticker
+      res.json({ 
+        success: true,
+        data: apiRes.data
+      });
       // Add stock to chart...
     }
   })

@@ -3,7 +3,8 @@
 /* ----- Variables ----- */
 :root {
   /* Colors */
-  --light-color: hsla(0, 0%, 90%, 0.5);
+  --light-color: hsla(0, 0%, 60%, 0.5);
+  --lighter-color: hsla(0, 0%, 90%, 0.5);
   /* Font sizes */
   --larger-font: 24px;
   --large-font: 20px;

@@ -1,0 +1,60 @@
+#chart {
+  width: 90vw;
+  margin: 3rem 0 3rem 0;
+  text-align: center;
+}
+
+/*----- Message window */
+#chart-message {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+#chart-message div {
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  background-color: var(--lighter-color);
+}
+/*----- /Message window */
+
+#chart-header {
+  margin-bottom: 3rem;
+}
+
+/*----- Remove buttons */
+#chart-remove {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 3rem;
+}
+
+#chart-remove button {
+  margin: 0 0.5rem 0 0.5rem;
+  padding: 0.1rem;
+}
+
+#chart-remove button span{
+  position: relative;
+  top: 2px;
+}
+/*----- /Remove buttons */
+
+/*----- Chart */
+#chart-chart {
+  height: min(80vw, 80vh);
+  width: 90%;
+  margin: 0 auto 3rem auto;
+  background-color: var(--lighter-color);
+}
+
+#chart-chart-tooltip {
+  padding: 0.5rem;
+  border-radius: 0.3rem;
+  background-color: var(--light-color);
+}
+/*----- /Chart */
+
+#chart-form {
+  margin-bottom: 3rem;
+}
