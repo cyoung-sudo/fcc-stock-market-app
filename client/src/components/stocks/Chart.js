@@ -1,7 +1,9 @@
 import './Chart.css';
 import axios from 'axios';
 // React
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+// Socket
+import { io } from 'socket.io-client';
 // Chart
 import { 
   ResponsiveContainer,
@@ -16,68 +18,93 @@ import {
 // Icons
 import { BsTrashFill } from 'react-icons/bs';
 
+// Connect to server (proxy server path)
+const socket = io();
+
 export default function Chart(props) {
   const [ stockToAdd, setStockToAdd ] = useState("");
   const [ chartStocks, setChartStocks ] = useState([]);
   // Messages
   const [message, setMessage] = useState("");
+  // Manual refresh
+  const [refresh, setRefresh] = useState(false);
 
-  //----- Handle form for adding stocks to chart
-  const handleAddStock = e => {
-    // Prevent refresh on submit
-    e.preventDefault();
-    // Get existing stock tickers
-    let existingStocks = chartStocks.map(stock => {
-      return stock[0].ticker
-    });
-    //Check for duplicate stock
-    if(existingStocks.includes(stockToAdd.toUpperCase())) {
-      displayMessage("Error: Duplicate stock");
-    } else {
-      // Send form data to server
+  //----- Retrieve updated stock data
+  useEffect(() => {
+    axios({
+      method: "get",
+      withCredentials: true,
+      url: "/api/chartStocks/existingStocks"
+    }).then(res => {
+      if(res.data.success) {
+        setChartStocks([...res.data.all_daily_data]);
+        // Scroll to top of page
+        window.scrollTo(0, 0);
+      } else {
+        displayMessage(res.data.message);
+      }
+    })
+    .catch(err => console.log(err));
+  }, [refresh]);
+
+  //----- Retrieve updated stock data on socket event
+  useEffect(() => {
+    socket.on("update_stocks", () => {
       axios({
-        method: "post",
-        data: { ticker: stockToAdd },
+        method: "get",
         withCredentials: true,
-        url: "/api/stockApi/addStock"
-      }).then((res) => {
+        url: "/api/chartStocks/existingStocks"
+      }).then(res => {
         if(res.data.success) {
-          let formattedStockData = formatStockData(res.data.data);
-          // Add stock data to chart
-          setChartStocks(state => [...state, formattedStockData]);
+          setChartStocks([...res.data.all_daily_data]);
         } else {
           displayMessage(res.data.message);
         }
       })
       .catch(err => console.log(err));
-    }
+    });
+  }, [socket]);
+
+  //----- Handle form for adding stocks to chart
+  const handleAddStock = e => {
+    // Prevent refresh on submit
+    e.preventDefault();
+    // Send form data to server
+    axios({
+      method: "post",
+      data: { symbol: stockToAdd },
+      withCredentials: true,
+      url: "/api/chartStocks/addStock"
+    }).then(res => {
+      if(res.data.success) {
+        // Refresh component
+        setRefresh(refresh => !refresh);
+        // Notify server of new stock addition
+        socket.emit("stocks_updated");
+      } else {
+        displayMessage(res.data.message);
+      }
+    })
+    .catch(err => console.log(err));
   };
 
   // Handle removing stocks from chart
-  const handleRemoveStock = ticker => {
-    let chartStocksCopy = [...chartStocks];
-    chartStocksCopy= chartStocksCopy.filter(stock => {
-      return stock[0].ticker !== ticker
-    });
-    setChartStocks(chartStocksCopy);
-  };
-
-  // Format stock data for chart
-  const formatStockData = stockData => {
-    let result = [];
-    // Uppercase ticker
-    let ticker = stockData["Meta Data"]["2. Symbol"].toUpperCase();
-    // Format data
-    for(const [key, value] of Object.entries(stockData["Time Series (Daily)"])) {
-      // Round price to 2 decimals
-      let roundedClose = Math.round(value["4. close"] * 100) / 100;
-      result.push({
-        ticker: ticker,
-        date: key,
-        close: roundedClose
-      });
-    }
-    return result;
+  const handleRemoveStock = symbol => {
+    // Send data to server
+    axios({
+      method: "delete",
+      data: { symbol: symbol },
+      withCredentials: true,
+      url: "/api/chartStocks/removeStock"
+    }).then(res => {
+      if(res.data.success) {
+        // Refresh component
+        setRefresh(refresh => !refresh);
+        // Notify server of stock updates
+        socket.emit("stocks_updated");
+      }
+    })
+    .catch(err => console.log(err));
   };
 
   const CustomTooltip = ({ active, payload }) => {
@@ -86,7 +113,7 @@ export default function Chart(props) {
         <div id="chart-chart-tooltip">
           <strong>{payload[0].payload.date}</strong>
           {payload.map((stock, idx) => (
-            <p key={idx}>{stock.payload.ticker}: ${stock.payload.close}</p>
+            <p key={idx}>{stock.payload.symbol}: ${stock.payload.close}</p>
           ))}
         </div>
       );
@@ -112,25 +139,28 @@ export default function Chart(props) {
         <h1>Daily Chart</h1>
       </div>
 
-      <div id="chart-remove">
-        {chartStocks && chartStocks.map((stock, idx) => (
-          <button key={idx} onClick={() => handleRemoveStock(stock[0].ticker)}>
-            {stock[0].ticker}<span><BsTrashFill/></span>
+      {/* Stock removal buttons */}
+      {(chartStocks.length > 0) && <div id="chart-remove">
+        {chartStocks.map((stock, idx) => (
+          <button key={idx} onClick={() => handleRemoveStock(stock.symbol)}>
+            {stock.symbol}<span><BsTrashFill/></span>
           </button>
         ))}
-      </div>
-
+      </div>}
+      {/* /Stock removal buttons */}
+  
       {/* Chart to display stock data */}
-      <div id="chart-chart">
+      {(chartStocks.length > 0) && <div id="chart-chart">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart>
-            {chartStocks && chartStocks.map((stock, idx) => (
+            {chartStocks.map((stock, idx) => (
               <Line 
                 key={idx}
-                data={stock}
+                data={stock.daily_data}
                 type="monotone"
                 dataKey="close"
-                stroke="#8884d8" />
+                stroke="#8884d8"
+                dot={false} />
             ))}
             <CartesianGrid stroke="#ccc" />
             <XAxis 
@@ -140,12 +170,14 @@ export default function Chart(props) {
               height={120}
               angle={-70}
               dx={-20}
-              dy={40}>
+              dy={40}
+              reversed>
               <Label
                 value="Date" 
                 position="insideBottom"/>
             </XAxis>
             <YAxis 
+              domain={[dataMin => Math.floor(dataMin), dataMax => Math.round(dataMax)]}
               tickCount={10}
               width={80}>
               <Label
@@ -156,14 +188,20 @@ export default function Chart(props) {
             <Tooltip content={<CustomTooltip/>}/>
           </LineChart>
         </ResponsiveContainer>
-      </div>
+      </div>}
       {/* /Chart to display stock data */}
+
+      {/* Display when chart is empty */}
+      {(chartStocks.length === 0) && <div id="chart-empty">
+        <h3>No stocks to display</h3>
+      </div>}
+      {/* /Display when chart is empty */}
 
       {/* Form to add stock to chart */}
       <form id="chart-form" onSubmit={handleAddStock}>
         <div id="chart-form-field">
-          <label>Ticker</label>
-          <input type="text" onChange={e => setStockToAdd(e.target.value)} placeholder="ticker"/>
+          <label>Symbol</label>
+          <input type="text" onChange={e => setStockToAdd(e.target.value)} placeholder="symbol"/>
         </div>
 
         <div id="chart-form-submit">

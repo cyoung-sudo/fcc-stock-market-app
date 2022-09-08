@@ -55,6 +55,14 @@
 }
 /*----- /Chart */
 
+#chart-empty {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: min(50vw, 50vh);
+  margin-bottom: 3rem;
+}
+
 #chart-form {
   margin-bottom: 3rem;
 }
