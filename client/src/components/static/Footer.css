@@ -3,6 +3,13 @@
   justify-content: center;
   align-items: center;
   padding: 2rem 1rem;
-  font-size: var(--smaller-font);
+  text-align: center;
   background-color: var(--lighter-color);
+}
+
+#footer-credits a {
+  font-size: var(--smaller-font);
+  font-style: italic;
+  text-decoration: none;
+  color: black;
 }
