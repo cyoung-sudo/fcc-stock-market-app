@@ -29,6 +29,16 @@ io.on('connection', socket => {
     socket.broadcast.emit('update_stocks');
   });
 });
+
+//----- Deployment settings
+if(process.env.NODE_ENV === 'production') {
+  // Serve static files from the client folder
+  app.use(express.static('client/build'));
+  // Load the React "index" for any "GET" routes not defined above
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
+  });
+}
  
 //----- Connection
 const port = process.env.PORT || 5000;
