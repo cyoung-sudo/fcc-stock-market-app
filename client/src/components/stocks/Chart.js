@@ -16,7 +16,8 @@ import {
   Label
 } from 'recharts';
 // Icons
-import { BsTrashFill } from 'react-icons/bs';
+import { AiOutlineLineChart, AiOutlineClose } from 'react-icons/ai';
+import { BsFillSquareFill } from 'react-icons/bs';
 
 // Connect to server (proxy server path)
 const socket = io();
@@ -113,7 +114,9 @@ export default function Chart(props) {
         <div id="chart-chart-tooltip">
           <strong>{payload[0].payload.date}</strong>
           {payload.map((stock, idx) => (
-            <p key={idx}>{stock.payload.symbol}: ${stock.payload.close}</p>
+            <p key={idx}>
+              <span style={{color: lineColors[idx]}}><BsFillSquareFill/></span>{stock.payload.symbol}: ${stock.payload.close}
+            </p>
           ))}
         </div>
       );
@@ -127,6 +130,9 @@ export default function Chart(props) {
     window.scrollTo(0, 0);
   };
 
+  // Chart line colors
+  const lineColors = ["dodgerblue", "crimson"];
+
   return (
     <div id="chart">
       {message && 
@@ -136,14 +142,19 @@ export default function Chart(props) {
       }
 
       <div id="chart-header">
-        <h1>Daily Chart</h1>
+        <h1>
+          <span><AiOutlineLineChart/></span>Daily Chart
+        </h1>
       </div>
 
       {/* Stock removal buttons */}
       {(chartStocks.length > 0) && <div id="chart-remove">
         {chartStocks.map((stock, idx) => (
-          <button key={idx} onClick={() => handleRemoveStock(stock.symbol)}>
-            {stock.symbol}<span><BsTrashFill/></span>
+          <button 
+            key={idx} 
+            onClick={() => handleRemoveStock(stock.symbol)}
+            style={{backgroundColor: lineColors[idx]}}>
+            {stock.symbol}<span className="chart-remove-icon"><AiOutlineClose/></span>
           </button>
         ))}
       </div>}
@@ -159,7 +170,7 @@ export default function Chart(props) {
                 data={stock.daily_data}
                 type="monotone"
                 dataKey="close"
-                stroke="#8884d8"
+                stroke={lineColors[idx]}
                 dot={false} />
             ))}
             <CartesianGrid stroke="#ccc" />
@@ -167,23 +178,27 @@ export default function Chart(props) {
               dataKey="date"
               interval={5}
               allowDuplicatedCategory={false}
-              height={120}
+              height={95}
               angle={-70}
-              dx={-20}
-              dy={40}
+              dx={-15}
+              dy={30}
+              tick={{fontSize: 12}}
               reversed>
               <Label
                 value="Date" 
-                position="insideBottom"/>
+                position="insideBottom"
+                dx={-10}/>
             </XAxis>
             <YAxis 
               domain={[dataMin => Math.floor(dataMin), dataMax => Math.round(dataMax)]}
               tickCount={10}
-              width={80}>
+              width={50}
+              tick={{fontSize: 12}}>
               <Label
                 value="Price (USD)" 
                 angle={-90}
-                position="insideLeft"/>
+                position="insideLeft"
+                dy={35}/>
             </YAxis>
             <Tooltip content={<CustomTooltip/>}/>
           </LineChart>
@@ -200,12 +215,11 @@ export default function Chart(props) {
       {/* Form to add stock to chart */}
       <form id="chart-form" onSubmit={handleAddStock}>
         <div id="chart-form-field">
-          <label>Symbol</label>
           <input type="text" onChange={e => setStockToAdd(e.target.value)} placeholder="symbol"/>
         </div>
 
         <div id="chart-form-submit">
-          <input type="submit" value="Submit"/>
+          <input type="submit" value="Add Stock"/>
         </div>
       </form>
       {/* /Form to add stock to chart */}

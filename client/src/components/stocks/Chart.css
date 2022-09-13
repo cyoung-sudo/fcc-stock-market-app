@@ -8,35 +8,55 @@
 #chart-message {
   display: flex;
   justify-content: center;
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
 #chart-message div {
-  padding: 0.5rem;
-  border-radius: 0.3rem;
+  padding: 0.7rem 1rem;
+  border-radius: 0.5rem;
   background-color: var(--lighter-color);
+  font-style: italic;
 }
 /*----- /Message window */
 
+/*----- Header */
 #chart-header {
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
+  font-style: italic;
 }
+
+#chart-header span {
+  position: relative;
+  top: 3px;
+  right: 3px;
+}
+/*----- /Header */
 
 /*----- Remove buttons */
 #chart-remove {
   display: flex;
   justify-content: center;
-  margin-bottom: 3rem;
+  margin-bottom: 1rem;
 }
 
 #chart-remove button {
   margin: 0 0.5rem 0 0.5rem;
-  padding: 0.1rem;
+  padding: 0.5rem 0.7rem;
+  border: none;
+  border-radius: 1rem;
+  font-weight: bold;
+  font-size: var(--smaller-font);
+  color: white;
 }
 
-#chart-remove button span{
+#chart-remove button:hover {
+  cursor: pointer;
+}
+
+.chart-remove-icon{
   position: relative;
   top: 2px;
+  left: 3px;
 }
 /*----- /Remove buttons */
 
@@ -44,14 +64,28 @@
 #chart-chart {
   height: min(80vw, 80vh);
   width: 90%;
-  margin: 0 auto 3rem auto;
+  margin: 0 auto 2rem auto;
+  border-radius: 0.5rem;
+  padding: 0.7rem;
   background-color: var(--lighter-color);
 }
 
 #chart-chart-tooltip {
-  padding: 0.5rem;
+  padding: 0.7rem 1rem;
   border-radius: 0.3rem;
+  font-size: var(--smaller-font);
+  font-style: italic;
   background-color: var(--light-color);
+}
+
+#chart-chart-tooltip p {
+  margin-top: 0.3rem;
+}
+
+#chart-chart-tooltip p span {
+  position: relative;
+  top: 2px;
+  right: 3px;
 }
 /*----- /Chart */
 
@@ -60,9 +94,29 @@
   justify-content: center;
   align-items: center;
   height: min(50vw, 50vh);
-  margin-bottom: 3rem;
+  margin-bottom: 2rem;
 }
 
-#chart-form {
-  margin-bottom: 3rem;
+/*----- Form */
+#chart-form-field input {
+  margin-bottom: 0.5rem;
+  padding: 0.2rem 0.5rem;
+  border: solid 0.07rem gray;
+  border-radius: 0.3rem;
+  font-size: var(--default-font);
 }
+
+#chart-form-submit input {
+  padding: 0.5rem 0.7rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-size: var(--smaller-font);
+  font-weight: bold;
+  background-color: dodgerblue;
+  color: white;
+}
+
+#chart-form-submit input:hover {
+  cursor: pointer;
+}
+/*----- /Form */

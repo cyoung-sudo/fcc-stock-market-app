@@ -3,5 +3,6 @@
   justify-content: center;
   align-items: center;
   padding: 2rem 1rem;
-  background-color: var(--light-color);
+  font-size: var(--smaller-font);
+  background-color: var(--lighter-color);
 }
